@@ -23,6 +23,8 @@ public class FixRatio : MonoBehaviour
     }
     void UpdateCamera()
     {
+        if (Screen.width == 0 || Screen.height == 0) return;
+
         float screenAspect = (float)Screen.width / Screen.height;
         float scaleHeight = screenAspect / targetAspect;
 

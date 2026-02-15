@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class TrapDamage : MonoBehaviour
 {
-    public float damage = 200f;
+    public float damage = 50f;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
