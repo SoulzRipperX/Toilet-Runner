@@ -9,6 +9,12 @@ public class CharacterController : MonoBehaviour
     public float runSpeed = 10f;
     public float jumpForce = 8f;
 
+    [Header("Combat Settings")]
+    public Transform attackPoint;
+    public float attackRange = 0.5f;
+    public LayerMask enemyLayer;
+    public float attackDamage = 20f;
+
     [Header("Stats")]
     public float maxStamina = 100f;
     public float staminaRecoveryRate = 10f;
@@ -83,6 +89,25 @@ public class CharacterController : MonoBehaviour
         UpdateAnimation(isSprinting);
     }
 
+    public void HandleAttack()
+    {
+        animator.SetTrigger("Attack");
+
+        if (attackPoint == null) return;
+
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayer);
+
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            Enemy enemyScript = enemy.GetComponent<Enemy>();
+            if (enemyScript != null)
+            {
+                enemyScript.TakeDamage(attackDamage);
+                Debug.Log("Hit Enemy!");
+            }
+        }
+    }
+
     public void HandleJump()
     {
         if (isGrounded)
@@ -94,18 +119,11 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-    public void HandleAttack()
-    {
-        animator.SetTrigger("Attack");
-    }
-
     public void MoveLeftDown() => mobileMoveInput = -1f;
     public void MoveRightDown() => mobileMoveInput = 1f;
     public void MoveStop() => mobileMoveInput = 0f;
-
     public void RunDown() => isMobileSprint = true;
     public void RunUp() => isMobileSprint = false;
-
 
     void UpdateAnimation(bool isSprinting)
     {
@@ -143,5 +161,12 @@ public class CharacterController : MonoBehaviour
         isGameOver = true;
         if (gameOverPanel) gameOverPanel.SetActive(true);
         Time.timeScale = 0f;
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        if (attackPoint == null) return;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
 }

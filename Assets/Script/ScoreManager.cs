@@ -37,4 +37,9 @@ public class ScoreManager : MonoBehaviour
             text.text = score.ToString();
         }
     }
+
+    public void Replay()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
 }

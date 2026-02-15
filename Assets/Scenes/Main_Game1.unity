@@ -2961,8 +2961,10 @@ GameObject:
   - component: {fileID: 1255795252}
   - component: {fileID: 1255795251}
   - component: {fileID: 1255795250}
-  m_Layer: 0
-  m_Name: Circle
+  - component: {fileID: 1255795253}
+  - component: {fileID: 1255795254}
+  m_Layer: 3
+  m_Name: "E\u0E4Cnemy"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2981,6 +2983,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 50
+  moveSpeed: 2
+  chaseSpeed: 4
+  damage: 20
+  detectionRange: 2
+  attackRange: 1
+  wanderRange: 3
 --- !u!212 &1255795251
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3048,6 +3056,68 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!50 &1255795253
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1255795249}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
+--- !u!58 &1255795254
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1255795249}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 0.5
 --- !u!1 &1256958685
 GameObject:
   m_ObjectHideFlags: 0
@@ -3743,10 +3813,16 @@ MonoBehaviour:
   moveSpeed: 4
   runSpeed: 8
   jumpForce: 8
+  attackPoint: {fileID: 750256720}
+  attackRange: 1
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  attackDamage: 20
   maxStamina: 100
   staminaRecoveryRate: 5
   maxHealth: 100
-  mobileUI: {fileID: 0}
+  mobileUI: {fileID: 2126766877}
   gameOverPanel: {fileID: 497760956}
   healthBar: {fileID: 1750615559}
   staminaBar: {fileID: 1462724882}
@@ -5184,8 +5260,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1355543968}
-        m_TargetAssemblyTypeName: CharacterController, Assembly-CSharp
+      - m_Target: {fileID: 562143568}
+        m_TargetAssemblyTypeName: ScoreManager, Assembly-CSharp
         m_MethodName: Replay
         m_Mode: 1
         m_Arguments:
