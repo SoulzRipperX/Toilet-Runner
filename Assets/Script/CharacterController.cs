@@ -14,11 +14,14 @@ public class CharacterController : MonoBehaviour
     public float attackRange = 0.5f;
     public LayerMask enemyLayer;
     public float attackDamage = 20f;
+    public float attackCooldown = 0.5f;
 
     [Header("Stats")]
     public float maxStamina = 100f;
     public float staminaRecoveryRate = 10f;
     public float maxHealth = 100f;
+    public float healthRecoveryRate = 5f;
+    public float healthRegenDelay = 3f;
 
     [Header("UI")]
     public GameObject mobileUI;
@@ -28,15 +31,22 @@ public class CharacterController : MonoBehaviour
 
     private float currentStamina;
     private float currentHealth;
+
     private Rigidbody2D rb2d;
     private Animator animator;
+
     private bool isGrounded;
     private bool isGameOver;
 
     private float horizontalInput;
     private float mobileMoveInput;
     private bool isMobileSprint;
+
+    private float currentSpeed;
     private Vector3 originalScale;
+
+    private float lastAttackTime;
+    private float lastDamageTime;
 
     void Start()
     {
@@ -53,15 +63,28 @@ public class CharacterController : MonoBehaviour
 
         Time.timeScale = 1f;
 
-#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
-        if (mobileUI) mobileUI.SetActive(true);
-#endif
+        if (mobileUI)
+            mobileUI.SetActive(Application.isMobilePlatform);
     }
 
     void Update()
     {
         if (isGameOver) return;
 
+        HandleInput();
+        HandleStamina();
+        HandleHealthRegen();
+        UpdateUI();
+        UpdateAnimation();
+    }
+
+    void FixedUpdate()
+    {
+        rb2d.velocity = new Vector2(horizontalInput * currentSpeed, rb2d.velocity.y);
+    }
+
+    void HandleInput()
+    {
         float keyboardH = Input.GetAxisRaw("Horizontal");
         horizontalInput = (keyboardH != 0) ? keyboardH : mobileMoveInput;
 
@@ -70,13 +93,58 @@ public class CharacterController : MonoBehaviour
         else if (horizontalInput < 0)
             transform.localScale = new Vector3(-originalScale.x, originalScale.y, originalScale.z);
 
-        bool isSprinting = (Input.GetKey(KeyCode.LeftShift) || isMobileSprint) && currentStamina > 1f && horizontalInput != 0;
-        float speed = isSprinting ? runSpeed : moveSpeed;
+        bool isSprinting = (Input.GetKey(KeyCode.LeftShift) || isMobileSprint)
+                           && currentStamina > 1f
+                           && horizontalInput != 0;
 
-        if (Input.GetKeyDown(KeyCode.Space)) HandleJump();
-        if (Input.GetKeyDown(KeyCode.J)) HandleAttack();
+        currentSpeed = isSprinting ? runSpeed : moveSpeed;
 
-        rb2d.velocity = new Vector2(horizontalInput * speed, rb2d.velocity.y);
+        if (Input.GetKeyDown(KeyCode.Space))
+            HandleJump();
+
+        if (Input.GetKeyDown(KeyCode.J))
+            HandleAttack(isSprinting);
+    }
+
+    void HandleAttack(bool isSprinting)
+    {
+        if (Time.time - lastAttackTime < attackCooldown)
+            return;
+
+        lastAttackTime = Time.time;
+
+        animator.SetTrigger("Attack");
+
+        if (attackPoint == null) return;
+
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
+            attackPoint.position,
+            attackRange,
+            enemyLayer);
+
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            Enemy enemyScript = enemy.GetComponent<Enemy>();
+            if (enemyScript != null)
+                enemyScript.TakeDamage(attackDamage);
+        }
+    }
+
+    void HandleJump()
+    {
+        if (isGrounded)
+        {
+            rb2d.velocity = new Vector2(rb2d.velocity.x, 0);
+            rb2d.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            isGrounded = false;
+        }
+    }
+
+    void HandleStamina()
+    {
+        bool isSprinting = (Input.GetKey(KeyCode.LeftShift) || isMobileSprint)
+                           && horizontalInput != 0
+                           && currentStamina > 1f;
 
         if (isSprinting)
             currentStamina -= 30f * Time.deltaTime;
@@ -84,54 +152,25 @@ public class CharacterController : MonoBehaviour
             currentStamina += staminaRecoveryRate * Time.deltaTime;
 
         currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
-
-        UpdateUI();
-        UpdateAnimation(isSprinting);
     }
 
-    public void HandleAttack()
+    void HandleHealthRegen()
     {
-        animator.SetTrigger("Attack");
+        if (currentHealth <= 0) return;
 
-        if (attackPoint == null) return;
-
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayer);
-
-        foreach (Collider2D enemy in hitEnemies)
+        if (Time.time - lastDamageTime >= healthRegenDelay)
         {
-            Enemy enemyScript = enemy.GetComponent<Enemy>();
-            if (enemyScript != null)
+            if (currentHealth < maxHealth)
             {
-                enemyScript.TakeDamage(attackDamage);
-                Debug.Log("Hit Enemy!");
+                currentHealth += healthRecoveryRate * Time.deltaTime;
+                currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
             }
         }
     }
 
-    public void HandleJump()
+    void UpdateAnimation()
     {
-        if (isGrounded)
-        {
-            rb2d.velocity = new Vector2(rb2d.velocity.x, 0);
-            rb2d.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-            isGrounded = false;
-            animator.SetBool("isGrounded", false);
-        }
-    }
-
-    public void MoveLeftDown() => mobileMoveInput = -1f;
-    public void MoveRightDown() => mobileMoveInput = 1f;
-    public void MoveStop() => mobileMoveInput = 0f;
-    public void RunDown() => isMobileSprint = true;
-    public void RunUp() => isMobileSprint = false;
-
-    void UpdateAnimation(bool isSprinting)
-    {
-        float animSpeed = 0;
-        if (horizontalInput != 0)
-            animSpeed = isSprinting ? 10f : 5f;
-
-        animator.SetFloat("Speed", animSpeed);
+        animator.SetFloat("Speed", Mathf.Abs(horizontalInput));
         animator.SetBool("isGrounded", isGrounded);
     }
 
@@ -144,16 +183,16 @@ public class CharacterController : MonoBehaviour
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
-        {
             isGrounded = true;
-            animator.SetBool("isGrounded", true);
-        }
     }
 
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
-        if (currentHealth <= 0) GameOver();
+        lastDamageTime = Time.time;
+
+        if (currentHealth <= 0)
+            GameOver();
     }
 
     void GameOver()
@@ -162,6 +201,13 @@ public class CharacterController : MonoBehaviour
         if (gameOverPanel) gameOverPanel.SetActive(true);
         Time.timeScale = 0f;
     }
+
+    // Mobile Controls
+    public void MoveLeftDown() => mobileMoveInput = -1f;
+    public void MoveRightDown() => mobileMoveInput = 1f;
+    public void MoveStop() => mobileMoveInput = 0f;
+    public void RunDown() => isMobileSprint = true;
+    public void RunUp() => isMobileSprint = false;
 
     void OnDrawGizmosSelected()
     {
