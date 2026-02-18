@@ -199,6 +199,17 @@ public class CharacterController : MonoBehaviour
             healthBar.value = currentHealth;
     }
 
+    public void Heal(float amount)
+    {
+        if (currentHealth <= 0) return;
+
+        currentHealth += amount;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
+        UpdateUI();
+    }
+
+
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))

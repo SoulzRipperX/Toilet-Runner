@@ -2,116 +2,171 @@
 
 public class Enemy : MonoBehaviour
 {
-    [Header("Stats")]
     public float health = 50f;
     public float moveSpeed = 2f;
     public float chaseSpeed = 4f;
     public float damage = 10f;
 
-    [Header("Combat")]
     public Transform attackPoint;
     public float attackRadius = 0.6f;
     public LayerMask playerLayer;
     public float attackCooldownTime = 1.5f;
 
-    [Header("AI Logic")]
     public float detectionRange = 5f;
     public float attackRange = 1.2f;
     public float wanderRange = 3f;
 
     private Transform player;
+    private Vector2 startPosition;
     private Vector2 targetPosition;
-    private float wanderTimer;
+
     private float attackCooldown;
-    private bool isChasing;
+    private float stateTimer;
+
+    private Animator animator;
+
+    private enum State { Idle, Wander, Chase, Attack, Hit }
+    private State currentState;
+
+    private bool facingRight = false;
 
     void Start()
     {
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null)
-            player = playerObj.transform;
+        animator = GetComponent<Animator>();
+        player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
+        startPosition = transform.position;
         SetNewWanderTarget();
+        currentState = State.Wander;
     }
 
     void Update()
     {
         if (health <= 0) return;
 
-        float distanceToPlayer = player != null ? Vector2.Distance(transform.position, player.position) : float.MaxValue;
+        if (attackCooldown > 0)
+            attackCooldown -= Time.deltaTime;
 
-        if (distanceToPlayer <= attackRange)
-        {
-            AttackPlayer();
-        }
-        else if (distanceToPlayer <= detectionRange)
-        {
-            ChasePlayer();
-        }
-        else
-        {
-            Wander();
-        }
+        float distance = player != null
+            ? Vector2.Distance(transform.position, player.position)
+            : Mathf.Infinity;
 
-        if (attackCooldown > 0) attackCooldown -= Time.deltaTime;
+        switch (currentState)
+        {
+            case State.Wander:
+                Wander();
+                if (distance <= detectionRange)
+                    currentState = State.Chase;
+                break;
+
+            case State.Chase:
+                Chase();
+                if (distance <= attackRange)
+                    currentState = State.Attack;
+                else if (distance > detectionRange)
+                    currentState = State.Wander;
+                break;
+
+            case State.Attack:
+                TryAttack();
+                break;
+
+            case State.Hit:
+                stateTimer -= Time.deltaTime;
+                if (stateTimer <= 0)
+                    currentState = State.Wander;
+                break;
+        }
     }
 
     void Wander()
     {
-        isChasing = false;
-        transform.position = Vector2.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
+        animator.SetFloat("Speed", moveSpeed);
 
-        if (Vector2.Distance(transform.position, targetPosition) < 0.2f)
+        transform.position = Vector2.MoveTowards(
+            transform.position,
+            targetPosition,
+            moveSpeed * Time.deltaTime);
+
+        if (Vector2.Distance(transform.position, targetPosition) < 0.1f)
         {
-            wanderTimer += Time.deltaTime;
-            if (wanderTimer >= 2f)
-            {
-                SetNewWanderTarget();
-                wanderTimer = 0;
-            }
+            SetNewWanderTarget();
         }
     }
 
     void SetNewWanderTarget()
     {
         float randomX = Random.Range(-wanderRange, wanderRange);
-        targetPosition = new Vector2(transform.position.x + randomX, transform.position.y);
+        targetPosition = new Vector2(startPosition.x + randomX, transform.position.y);
+        Flip(targetPosition.x > transform.position.x);
     }
 
-    void ChasePlayer()
+    void Chase()
     {
-        isChasing = true;
-        Vector2 direction = new Vector2(player.position.x, transform.position.y);
-        transform.position = Vector2.MoveTowards(transform.position, direction, chaseSpeed * Time.deltaTime);
+        animator.SetFloat("Speed", chaseSpeed);
+
+        Vector2 target = new Vector2(player.position.x, transform.position.y);
+
+        transform.position = Vector2.MoveTowards(
+            transform.position,
+            target,
+            chaseSpeed * Time.deltaTime);
+
+        Flip(player.position.x > transform.position.x);
     }
 
-    void AttackPlayer()
+    void TryAttack()
     {
-        if (attackCooldown > 0) return;
+        if (attackCooldown > 0)
+        {
+            currentState = State.Chase;
+            return;
+        }
 
+        animator.SetTrigger("Attack");
+        attackCooldown = attackCooldownTime;
+        stateTimer = 0.5f;
+        currentState = State.Chase;
+    }
+
+    public void DealDamage()
+    {
         if (attackPoint == null) return;
 
-        Collider2D hitPlayer = Physics2D.OverlapCircle(
+        Collider2D hit = Physics2D.OverlapCircle(
             attackPoint.position,
             attackRadius,
             playerLayer);
 
-        if (hitPlayer != null)
+        if (hit != null)
         {
-            CharacterController playerScript = hitPlayer.GetComponent<CharacterController>();
-            if (playerScript != null)
-            {
-                playerScript.TakeDamage(damage);
-            }
+            var p = hit.GetComponent<CharacterController>();
+            if (p != null)
+                p.TakeDamage(damage);
         }
-
-        attackCooldown = attackCooldownTime;
     }
 
-    public void TakeDamage(float damageAmount)
+    public void TakeDamage(float dmg)
     {
-        health -= damageAmount;
-        if (health <= 0) Destroy(gameObject);
+        health -= dmg;
+
+        animator.SetTrigger("Hit");
+        currentState = State.Hit;
+        stateTimer = 0.3f;
+
+        if (health <= 0)
+            Destroy(gameObject);
+    }
+
+    void Flip(bool shouldFaceRight)
+    {
+        if (shouldFaceRight != facingRight)
+        {
+            facingRight = shouldFaceRight;
+            Vector3 scale = transform.localScale;
+            scale.x *= -1;
+            transform.localScale = scale;
+        }
     }
 
     void OnDrawGizmosSelected()
@@ -120,7 +175,6 @@ public class Enemy : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, detectionRange);
 
         Gizmos.color = Color.red;
-
         if (attackPoint != null)
             Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
     }
