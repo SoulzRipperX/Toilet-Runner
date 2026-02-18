@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -6,10 +6,13 @@ using UnityEngine.SceneManagement;
 public class ScoreManager : MonoBehaviour
 {
     public static ScoreManager Instance;
-    
-    int score;
-    public List<TextMeshProUGUI> scoreText;
 
+    [Header("UI")]
+    public TextMeshProUGUI scoreValueText;
+
+    private int score;
+    private int displayedScore;
+    private Coroutine scoreCoroutine;
 
     private void Awake()
     {
@@ -21,21 +24,42 @@ public class ScoreManager : MonoBehaviour
 
     private void Start()
     {
-        UpdateScoreUI();
+        UpdateScoreInstant();
     }
 
     public void AddScore(int value)
     {
         score += value;
-        UpdateScoreUI();
+
+        if (scoreCoroutine != null)
+            StopCoroutine(scoreCoroutine);
+
+        scoreCoroutine = StartCoroutine(AnimateScore());
     }
 
-    private void UpdateScoreUI()
+    IEnumerator AnimateScore()
     {
-        foreach (var text in scoreText)
+        while (displayedScore < score)
         {
-            text.text = score.ToString();
+            displayedScore += Mathf.CeilToInt((score - displayedScore) * 0.2f);
+
+            if (displayedScore > score)
+                displayedScore = score;
+
+            scoreValueText.text = displayedScore.ToString("D6");
+
+            yield return new WaitForSeconds(0.02f);
         }
+
+        scoreValueText.transform.localScale = Vector3.one * 1.2f;
+        yield return new WaitForSeconds(0.05f);
+        scoreValueText.transform.localScale = Vector3.one;
+    }
+
+    void UpdateScoreInstant()
+    {
+        displayedScore = score;
+        scoreValueText.text = displayedScore.ToString("D6");
     }
 
     public void Replay()

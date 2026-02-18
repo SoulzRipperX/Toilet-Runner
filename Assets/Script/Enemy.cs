@@ -8,6 +8,12 @@ public class Enemy : MonoBehaviour
     public float chaseSpeed = 4f;
     public float damage = 10f;
 
+    [Header("Combat")]
+    public Transform attackPoint;
+    public float attackRadius = 0.6f;
+    public LayerMask playerLayer;
+    public float attackCooldownTime = 1.5f;
+
     [Header("AI Logic")]
     public float detectionRange = 5f;
     public float attackRange = 1.2f;
@@ -81,16 +87,25 @@ public class Enemy : MonoBehaviour
 
     void AttackPlayer()
     {
-        if (attackCooldown <= 0)
+        if (attackCooldown > 0) return;
+
+        if (attackPoint == null) return;
+
+        Collider2D hitPlayer = Physics2D.OverlapCircle(
+            attackPoint.position,
+            attackRadius,
+            playerLayer);
+
+        if (hitPlayer != null)
         {
-            Debug.Log("ศัตรูโจมตีผู้เล่น!");
-            CharacterController playerScript = player.GetComponent<CharacterController>();
+            CharacterController playerScript = hitPlayer.GetComponent<CharacterController>();
             if (playerScript != null)
             {
                 playerScript.TakeDamage(damage);
             }
-            attackCooldown = 1.5f;
         }
+
+        attackCooldown = attackCooldownTime;
     }
 
     public void TakeDamage(float damageAmount)
@@ -103,7 +118,10 @@ public class Enemy : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, detectionRange);
+
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+
+        if (attackPoint != null)
+            Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
     }
 }

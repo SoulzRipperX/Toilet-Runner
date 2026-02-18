@@ -57,14 +57,27 @@ public class CharacterController : MonoBehaviour
         currentHealth = maxHealth;
         currentStamina = maxStamina;
 
-        if (healthBar) healthBar.maxValue = maxHealth;
-        if (staminaBar) staminaBar.maxValue = maxStamina;
-        if (gameOverPanel) gameOverPanel.SetActive(false);
+        if (healthBar)
+        {
+            healthBar.maxValue = maxHealth;
+            healthBar.value = currentHealth;
+        }
+
+        if (staminaBar)
+        {
+            staminaBar.maxValue = maxStamina;
+            staminaBar.value = currentStamina;
+        }
+
+        if (gameOverPanel)
+            gameOverPanel.SetActive(false);
 
         Time.timeScale = 1f;
 
         if (mobileUI)
-            mobileUI.SetActive(Application.isMobilePlatform);
+        {
+            mobileUI.SetActive(Input.touchSupported);
+        }
     }
 
     void Update()
@@ -74,8 +87,8 @@ public class CharacterController : MonoBehaviour
         HandleInput();
         HandleStamina();
         HandleHealthRegen();
-        UpdateUI();
         UpdateAnimation();
+        UpdateUI();
     }
 
     void FixedUpdate()
@@ -103,10 +116,10 @@ public class CharacterController : MonoBehaviour
             HandleJump();
 
         if (Input.GetKeyDown(KeyCode.J))
-            HandleAttack(isSprinting);
+            HandleAttack();
     }
 
-    void HandleAttack(bool isSprinting)
+    void HandleAttack()
     {
         if (Time.time - lastAttackTime < attackCooldown)
             return;
@@ -132,13 +145,16 @@ public class CharacterController : MonoBehaviour
 
     void HandleJump()
     {
-        if (isGrounded)
-        {
-            rb2d.velocity = new Vector2(rb2d.velocity.x, 0);
-            rb2d.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-            isGrounded = false;
-        }
+        if (!isGrounded) return;
+
+        isGrounded = false;
+
+        rb2d.velocity = new Vector2(rb2d.velocity.x, 0);
+        rb2d.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+
+        animator.SetTrigger("Jump");
     }
+
 
     void HandleStamina()
     {
@@ -176,20 +192,32 @@ public class CharacterController : MonoBehaviour
 
     void UpdateUI()
     {
-        if (staminaBar) staminaBar.value = currentStamina;
-        if (healthBar) healthBar.value = currentHealth;
+        if (staminaBar)
+            staminaBar.value = currentStamina;
+
+        if (healthBar)
+            healthBar.value = currentHealth;
     }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
+        {
             isGrounded = true;
+            animator.SetBool("isGrounded", true);
+        }
     }
 
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
         lastDamageTime = Time.time;
+
+        animator.SetTrigger("Hit");
+
+        UpdateUI();
 
         if (currentHealth <= 0)
             GameOver();
@@ -203,6 +231,23 @@ public class CharacterController : MonoBehaviour
     }
 
     // Mobile Controls
+    public void MobileJump()
+    {
+        HandleJump();
+    }
+
+    public void MobileAttack()
+    {
+        HandleAttack();
+    }
+
+    public void ToggleMobileUI()
+    {
+        if (mobileUI == null) return;
+
+        mobileUI.SetActive(!mobileUI.activeSelf);
+    }
+
     public void MoveLeftDown() => mobileMoveInput = -1f;
     public void MoveRightDown() => mobileMoveInput = 1f;
     public void MoveStop() => mobileMoveInput = 0f;

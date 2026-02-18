@@ -12,7 +12,7 @@ TagManager:
   - Enemy
   - Water
   - UI
-  - 
+  - Player
   - 
   - 
   - 
@@ -41,4 +41,28 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Building
+    uniqueID: 3101308965
+    locked: 0
+  - name: Water
+    uniqueID: 2922757295
+    locked: 0
+  - name: Street Art
+    uniqueID: 1691420805
+    locked: 0
+  - name: Walking Street
+    uniqueID: 2771306511
+    locked: 0
+  - name: Prop
+    uniqueID: 3243131413
+    locked: 0
+  - name: Item and Trap
+    uniqueID: 3459002291
+    locked: 0
+  - name: Player and Emeny
+    uniqueID: 538451047
+    locked: 0
+  - name: UI
+    uniqueID: 3950973547
     locked: 0
