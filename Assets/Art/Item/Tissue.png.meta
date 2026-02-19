@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: fa7568b3a56fa6d40922566f27a0899d
+guid: 50f3bf9c07392f7439f1fcf40cb1af61
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -123,13 +123,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Stop_0
+      name: Tissue_0
       rect:
         serializedVersion: 2
-        x: 930
-        y: 1005
-        width: 60
-        height: 56
+        x: 1023
+        y: 139
+        width: 50
+        height: 26
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -137,8 +137,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 0f776416b26614a4285ff9802e461540
-      internalID: 756386779
+      spriteID: 2f2686a4b16771c4dbc6474a973b9ee3
+      internalID: 1111516889
       vertices: []
       indices: 
       edges: []
@@ -154,7 +154,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Stop_0: 756386779
+      Tissue_0: 1111516889
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
