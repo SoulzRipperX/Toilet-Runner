@@ -6,7 +6,7 @@ public class InteractItemScore : MonoBehaviour
     public EntityType type;
     public AudioClip collectSound;
 
-    public enum EntityType { Star, GoldStar, RainbowStar }
+    public enum EntityType { Tissue, GoldTissue, RainbowTissue }
 
     private int pointValue;
 
@@ -24,13 +24,13 @@ public class InteractItemScore : MonoBehaviour
 
         switch (type)
         {
-            case EntityType.Star:
+            case EntityType.Tissue:
                 pointValue = 1;
                 break;
-            case EntityType.GoldStar:
+            case EntityType.GoldTissue:
                 pointValue = 3;
                 break;
-            case EntityType.RainbowStar:
+            case EntityType.RainbowTissue:
                 pointValue = 5;
                 break;
         }

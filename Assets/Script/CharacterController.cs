@@ -157,7 +157,7 @@ public class CharacterController : MonoBehaviour
 
         rb2d.velocity = new Vector2(rb2d.velocity.x, 0);
         rb2d.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-
+        AudioManager.instance.PlaySFX(AudioManager.instance.jumpClip);
         animator.SetTrigger("Jump");
     }
 
@@ -243,6 +243,8 @@ public class CharacterController : MonoBehaviour
         isGameOver = true;
         if (gameOverPanel) gameOverPanel.SetActive(true);
         Time.timeScale = 0f;
+        AudioManager.instance.StopBGM();
+        AudioManager.instance.PlaySFX(AudioManager.instance.loseClip);
     }
 
     public void SetMobileUI(bool state)
