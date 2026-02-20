@@ -28,6 +28,7 @@ public class CharacterController : MonoBehaviour
     public GameObject gameOverPanel;
     public Slider healthBar;
     public Slider staminaBar;
+    public Toggle mobileUIToggle;
 
     private float currentStamina;
     private float currentHealth;
@@ -74,9 +75,14 @@ public class CharacterController : MonoBehaviour
 
         Time.timeScale = 1f;
 
-        if (mobileUI)
+        if (mobileUIToggle != null)
         {
-            mobileUI.SetActive(Input.touchSupported);
+            mobileUIToggle.onValueChanged.AddListener(SetMobileUI);
+            SetMobileUI(mobileUIToggle.isOn);
+        }
+        else if (mobileUI != null)
+        {
+            mobileUI.SetActive(false);
         }
     }
 
@@ -155,7 +161,6 @@ public class CharacterController : MonoBehaviour
         animator.SetTrigger("Jump");
     }
 
-
     void HandleStamina()
     {
         bool isSprinting = (Input.GetKey(KeyCode.LeftShift) || isMobileSprint)
@@ -209,7 +214,6 @@ public class CharacterController : MonoBehaviour
         UpdateUI();
     }
 
-
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
@@ -241,24 +245,14 @@ public class CharacterController : MonoBehaviour
         Time.timeScale = 0f;
     }
 
-    // Mobile Controls
-    public void MobileJump()
-    {
-        HandleJump();
-    }
-
-    public void MobileAttack()
-    {
-        HandleAttack();
-    }
-
-    public void ToggleMobileUI()
+    public void SetMobileUI(bool state)
     {
         if (mobileUI == null) return;
-
-        mobileUI.SetActive(!mobileUI.activeSelf);
+        mobileUI.SetActive(state);
     }
 
+    public void MobileJump() => HandleJump();
+    public void MobileAttack() => HandleAttack();
     public void MoveLeftDown() => mobileMoveInput = -1f;
     public void MoveRightDown() => mobileMoveInput = 1f;
     public void MoveStop() => mobileMoveInput = 0f;

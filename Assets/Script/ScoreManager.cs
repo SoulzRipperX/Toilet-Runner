@@ -8,7 +8,7 @@ public class ScoreManager : MonoBehaviour
     public static ScoreManager Instance;
 
     [Header("UI")]
-    public TextMeshProUGUI scoreValueText;
+    public TextMeshProUGUI[] scoreTexts;
 
     private int score;
     private int displayedScore;
@@ -46,20 +46,35 @@ public class ScoreManager : MonoBehaviour
             if (displayedScore > score)
                 displayedScore = score;
 
-            scoreValueText.text = displayedScore.ToString("D6");
+            UpdateAllScoreTexts(displayedScore);
 
             yield return new WaitForSeconds(0.02f);
         }
 
-        scoreValueText.transform.localScale = Vector3.one * 1.2f;
+        foreach (var text in scoreTexts)
+            text.transform.localScale = Vector3.one * 1.2f;
+
         yield return new WaitForSeconds(0.05f);
-        scoreValueText.transform.localScale = Vector3.one;
+
+        foreach (var text in scoreTexts)
+            text.transform.localScale = Vector3.one;
+    }
+
+    void UpdateAllScoreTexts(int value)
+    {
+        string formatted = value.ToString("D6");
+
+        foreach (var text in scoreTexts)
+        {
+            if (text != null)
+                text.text = formatted;
+        }
     }
 
     void UpdateScoreInstant()
     {
         displayedScore = score;
-        scoreValueText.text = displayedScore.ToString("D6");
+        UpdateAllScoreTexts(displayedScore);
     }
 
     public void Replay()

@@ -439,6 +439,7 @@ MonoBehaviour:
   gameOverPanel: {fileID: 497760956}
   healthBar: {fileID: 1750615559}
   staminaBar: {fileID: 1462724882}
+  mobileUIToggle: {fileID: 1968042697}
 --- !u!95 &108390053
 Animator:
   serializedVersion: 5
@@ -1025,6 +1026,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 2
   collectSound: {fileID: 8300000, guid: 8600cfae73ea25140938c85a9ed73538, type: 3}
+  floatSpeed: 2
+  floatHeight: 0.2
+  rotateSpeed: 50
 --- !u!212 &133407995
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -2632,7 +2636,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af689e027adec704e8cf86fe6bafd5d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scoreValueText: {fileID: 643010265}
+  scoreTexts:
+  - {fileID: 643010265}
+  - {fileID: 801362486}
 --- !u!1 &584407225
 GameObject:
   m_ObjectHideFlags: 0
@@ -5143,6 +5149,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healAmount: 20
   destroyOnPickup: 1
+  floatSpeed: 2
+  floatHeight: 0.2
+  rotateSpeed: 50
 --- !u!61 &1065624244
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -5172,21 +5181,21 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
+    oldSize: {x: 0.42, y: 0.41}
+    newSize: {x: 0.42, y: 0.41}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.42, y: 0.41}
   m_EdgeRadius: 0
 --- !u!212 &1065624245
 SpriteRenderer:
@@ -5229,12 +5238,12 @@ SpriteRenderer:
   m_SortingLayerID: -835965005
   m_SortingLayer: 6
   m_SortingOrder: 1
-  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 0.08809495, g: 1, b: 0, a: 1}
+  m_Sprite: {fileID: -210194768, guid: e9a80fe8f15aae84eaa804f27204df22, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.42, y: 0.41}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -5250,8 +5259,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -14.28, y: -2.78, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6012,6 +6021,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 1
   collectSound: {fileID: 8300000, guid: 8600cfae73ea25140938c85a9ed73538, type: 3}
+  floatSpeed: 2
+  floatHeight: 0.2
+  rotateSpeed: 50
 --- !u!212 &1330091354
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -6538,9 +6550,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1520023288}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.0543535, y: 1.1536041, z: 228.6219}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 562143567}
@@ -7482,8 +7494,8 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 108390052}
         m_TargetAssemblyTypeName: CharacterController, Assembly-CSharp
-        m_MethodName: ToggleMobileUI
-        m_Mode: 1
+        m_MethodName: SetMobileUI
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -7728,7 +7740,7 @@ Transform:
   m_GameObject: {fileID: 2092670981}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -8.4, y: 3.55, z: 0}
+  m_LocalPosition: {x: -8.4, y: 3.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
