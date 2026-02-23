@@ -1,30 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FixRatio : MonoBehaviour
 {
     [Header("Settings")]
     public Camera targetCamera;
-    public float targetAspect = 16f / 9;
+    public float targetAspect = 16f / 9f;
 
     void Start()
     {
         if (targetCamera == null)
-        {
             targetCamera = Camera.main;
-        }
-    }
 
-    void Update()
-    {
-        if (targetCamera == null) return;
         UpdateCamera();
     }
+
     void UpdateCamera()
     {
-        if (Screen.width == 0 || Screen.height == 0) return;
-
         float screenAspect = (float)Screen.width / Screen.height;
         float scaleHeight = screenAspect / targetAspect;
 
